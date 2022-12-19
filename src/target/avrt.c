@@ -9,9 +9,16 @@
 #include "config.h"
 #endif
 
+#include "jtag/jtag.h"
 #include "avrt.h"
 #include "target.h"
 #include "target_type.h"
+#include "avrt_mem.h"
+#include "avrt_jtag.h"
+#include "avrt_regs.h"
+#include "breakpoints.h"
+#include "algorithm.h"
+#include "register.h"
 
 #define AVR_JTAG_INS_LEN	4
 
@@ -48,10 +55,9 @@ struct target_type avr_target = {
 
 	.assert_reset = avr_assert_reset,
 	.deassert_reset = avr_deassert_reset,
+	.read_memory = avr_read_memory,
 /*
 	.get_gdb_reg_list = avr_get_gdb_reg_list,
-
-	.read_memory = avr_read_memory,
 	.write_memory = avr_write_memory,
 	.bulk_write_memory = avr_bulk_write_memory,
 	.checksum_memory = avr_checksum_memory,
@@ -101,7 +107,29 @@ static int avr_poll(struct target *target)
 
 static int avr_halt(struct target *target)
 {
-	LOG_DEBUG("%s", __func__);
+	struct avr_common *avr = target_to_avr(target);
+	LOG_DEBUG("target->state: %s", target_state_name(target));
+	if(target->state == TARGET_HALTED){
+		LOG_DEBUG("target was already halted");
+		return ERROR_OK;
+	}
+	
+	if(target->state == TARGET_UNKNOWN){
+		LOG_WARNING("target was in an unknown state when halt was requested");
+	}
+
+	if(target -> state == TARGET_RESET){
+		if((jtag_get_reset_config() & RESET_SRST_PULLS_TRST) && jtag_get_srst()){
+			LOG_ERROR("can't request a halt while in reset if nSRST pulls nTRST");
+			return ERROR_TARGET_FAILURE;
+		} else {
+			target->debug_reason = DBG_REASON_DBGRQ;
+			return ERROR_OK;
+		}
+	}
+	avrt_ocd_setbits(&avr->jtag, AVRT_OCDREG_DC, OCDREG_DC_DBR);
+	target->debug_reason = DBG_REASON_DBGRQ;
+
 	return ERROR_OK;
 }
 
@@ -133,6 +161,28 @@ static int avr_deassert_reset(struct target *target)
 	LOG_DEBUG("%s", __func__);
 	return ERROR_OK;
 }
+
+static int avr_read_memory(struct target *target, target_addr_t address, uint32_t count, uint8_t *buffer){
+	struct avr_common *avr = target_to_avr(target);
+	
+	LOG_DEBUG("address: 0x%8.8" TARGET_PRIxADDR ", size: 0x%8.8" PRIx32 ", count: 0x%8.8" PRIx32 "",
+		address,
+		size,
+		count);
+	
+	if (target->state != TARGET_HALTED) {
+		LOG_WARNING("target not halted");
+		return ERROR_TARGET_NOT_HALTED;
+	}
+
+	if ((count == 0) || !(buffer)){
+		return ERROR_COMMAND_SYNTAX_ERROR;
+	}
+
+	return avr_jtag_read_memory8(&avr_common->jtag_info, address, count, buffer);
+
+}
+
 
 int avr_jtag_senddat(struct jtag_tap *tap, uint32_t *dr_in, uint32_t dr_out,
 		int len)

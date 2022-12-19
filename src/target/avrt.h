@@ -18,6 +18,12 @@ struct avr_common {
 	struct mcu_jtag jtag_info;
 };
 
+static inline struct avr_common *
+target_to_avr(struct target *target)
+{
+	return (struct avr_common *)target->arch_info;
+}
+
 int mcu_execute_queue(void);
 int avr_jtag_sendinstr(struct jtag_tap *tap, uint8_t *ir_in, uint8_t ir_out);
 int avr_jtag_senddat(struct jtag_tap *tap, uint32_t *dr_in, uint32_t dr_out,
