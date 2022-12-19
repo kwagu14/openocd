@@ -11,7 +11,7 @@ static int avr_jtag_mwa_read_data(struct mcu_jtag *jtag_info,uint8_t *pdata)
 {
 
 	struct scan_field fields[2];
-	uint8_t data_buf[4];
+	uint8_t data_buf[1];
 	uint8_t busy_buf[4];
 	int busy;
 
@@ -35,10 +35,10 @@ static int avr_jtag_mwa_read_data(struct mcu_jtag *jtag_info,uint8_t *pdata)
 			return ERROR_FAIL;
 		}
 
-		busy = buf_get_u32(busy_buf, 0, 1);
+		busy = busy_buf[0];
 	} while (busy);
 
-	*pdata = buf_get_u32(data_buf, 0, 32);
+	buf_cpy(data_buf, pdata, 8);
 
 	return ERROR_OK;
 }

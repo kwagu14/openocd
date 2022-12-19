@@ -11,9 +11,8 @@
 int avr_jtag_read_memory8(struct mcu_jtag *jtag_info,
 	uint32_t addr, int count, uint8_t *buffer)
 {
-	int i, retval;
-    //should be changed to an array of 4 bytes ? 
-	uint32_t data;
+	int i, retval; 
+	uint8_t data;
 
 	for (i = 0; i < count; i++) {
 		retval = avr_jtag_mwa_read(jtag_info, SLAVE_HSB_UNCACHED,
