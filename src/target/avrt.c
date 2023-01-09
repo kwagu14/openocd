@@ -2,7 +2,10 @@
 
 /***************************************************************************
  *   Copyright (C) 2009 by Simon Qian                                      *
- *   SimonQian@SimonQian.com                                               *
+ *   SimonQian@SimonQian.com   											   *
+ *   																	   *
+ *   Last modified 01/2023 by Karley W. 								   *
+ *	 kwagu14@lsu.edu													   *
  ***************************************************************************/
 
 #ifdef HAVE_CONFIG_H
@@ -80,13 +83,21 @@ static int avr_target_create(struct target *target, Jim_Interp *interp)
 
 	avr->jtag_info.tap = target->tap;
 	target->arch_info = avr;
+	
+	//debugging code for ATMEGA32A
+	if(avr->jtag_info.tap->ir_length != 4){
+		LOG_ERROR("The jtag instruction length should be 4 bits long.");
+		return ERROR_FAIL;
+	}
 
 	return ERROR_OK;
 }
 
 static int avr_init_target(struct command_context *cmd_ctx, struct target *target)
 {
-	LOG_DEBUG("%s", __func__);
+	struct avr_common *avr = target_to_avr(target);
+
+	avr->jtag_info.tap = target->tap;
 	return ERROR_OK;
 }
 
@@ -107,29 +118,7 @@ static int avr_poll(struct target *target)
 
 static int avr_halt(struct target *target)
 {
-	struct avr_common *avr = target_to_avr(target);
-	LOG_DEBUG("target->state: %s", target_state_name(target));
-	if(target->state == TARGET_HALTED){
-		LOG_DEBUG("target was already halted");
-		return ERROR_OK;
-	}
-	
-	if(target->state == TARGET_UNKNOWN){
-		LOG_WARNING("target was in an unknown state when halt was requested");
-	}
-
-	if(target -> state == TARGET_RESET){
-		if((jtag_get_reset_config() & RESET_SRST_PULLS_TRST) && jtag_get_srst()){
-			LOG_ERROR("can't request a halt while in reset if nSRST pulls nTRST");
-			return ERROR_TARGET_FAILURE;
-		} else {
-			target->debug_reason = DBG_REASON_DBGRQ;
-			return ERROR_OK;
-		}
-	}
-	avrt_ocd_setbits(&avr->jtag, AVRT_OCDREG_DC, OCDREG_DC_DBR);
-	target->debug_reason = DBG_REASON_DBGRQ;
-
+	LOG_DEBUG("%s", __func__);
 	return ERROR_OK;
 }
 
@@ -169,11 +158,6 @@ static int avr_read_memory(struct target *target, target_addr_t address, uint32_
 		address,
 		size,
 		count);
-	
-	if (target->state != TARGET_HALTED) {
-		LOG_WARNING("target not halted");
-		return ERROR_TARGET_NOT_HALTED;
-	}
 
 	if ((count == 0) || !(buffer)){
 		return ERROR_COMMAND_SYNTAX_ERROR;
