@@ -25,6 +25,11 @@
 #define ATMEGA32_PROG_PAGELOAD 		0x6
 #define ATMEGA32_PROG_PAGEREAD 		0x7
 
+/***************** Boundary Scan Instructions **********************/
+
+
+/****************** Debugging Instructions *************************/
+//proprietary to ATMEL + selected vendors
 
 
 /* 
@@ -47,6 +52,9 @@
 	These hex codes represent bit sequences that should be shifted in 
 	through TDI; the results of previous command sequences are shifted 
 	out through TDO)
+	
+	(To use, call PROG_COMMAND instruction and put these codes into the 
+	Program Command data register).
 	
 	Note: some sequences have to be OR'ed with input to get the final
 	sequence that should be sent out through TDI; these are marked with
@@ -118,8 +126,8 @@ const int READ_CALIB_BYTE[] = {0x3600, 0x3700};
 const int NO_OP[] = {0x2300, 0x3300};
 
 
-//function declarations 
 
+//function declarations 
 static int avr_jtag_set_instr_reg(struct avrt_jtag *jtag_info, int new_instr);
 static int avr_jtag_set_data_reg(struct avrt_jtag *jtag_info, uint8_t *data, tap_state_t end_state);
 static int avr_jtag_read_data_reg(struct avrt_jtag *jtag_info, uint8_t *TDO_buffer, tap_state_t end_state);
