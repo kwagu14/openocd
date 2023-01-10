@@ -2,10 +2,10 @@
 
 /***************************************************************************
  *   Copyright (C) 2009 by Simon Qian                                      *
- *   SimonQian@SimonQian.com   											   *
- *   																	   *
- *   Last modified 01/2023 by Karley W. 								   *
- *	 kwagu14@lsu.edu													   *
+ *   SimonQian@SimonQian.com                                               *
+ *                                                                         *
+ *   Last modified 01/2023 by Karley W.                                    *
+ *	 kwagu14@lsu.edu                                                       *
  ***************************************************************************/
 
 #ifdef HAVE_CONFIG_H
