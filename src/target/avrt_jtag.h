@@ -12,8 +12,8 @@
 
 //data register lengths
 #define PROG_COMMAND_LEN 		15
-#define #PROG_ENABLE_LEN 		16
-#define #RESET_LEN 				1		
+#define PROG_ENABLE_LEN 		16
+#define RESET_LEN 				1		
 
 /* 
 	JTAG Instruction codes:
@@ -137,5 +137,8 @@ const int NO_OP[] = {0x2300, 0x3300};
 static int avr_jtag_set_instr_reg(struct avrt_jtag *jtag_info, int new_instr);
 static int avr_jtag_set_data_reg(struct avrt_jtag *jtag_info, uint8_t *data, tap_state_t end_state);
 static int avr_jtag_read_data_reg(struct avrt_jtag *jtag_info, uint8_t *TDO_buffer, tap_state_t end_state);
+static int* avr_jtag_exec_prog_command(struct avrt_jtag *jtag_info, int* command, int command_len);
+static int avr_jtag_toggle_reset(struct avrt_jtag *jtag_info, int value);
+static int avr_jtag_toggle_program_enable(struct avrt_jtag *jtag_info, int value);
 static int avr_jtag_read_internal_flash();
 static int avr_jtag_write_internal_flash();

@@ -151,6 +151,17 @@ static int* avr_jtag_exec_prog_command(struct avrt_jtag *jtag_info, int* command
 }
 
 
+//wrapper function for easily toggling reset
+static int avr_jtag_toggle_reset(struct avrt_jtag *jtag_info, int value){
+	avr_jtag_set_data_reg(jtag_info, value, RESET_LEN, TAP_IDLE);
+}
+
+//wrapper function for easily toggling program enable
+static int avr_jtag_toggle_program_enable(struct avrt_jtag *jtag_info, int value){
+	avr_jtag_set_data_reg(jtag_info, value, PROG_ENABLE_LEN, TAP_IDLE);
+}
+
+
 
 static int avr_jtag_read_internal_flash(){
 	
