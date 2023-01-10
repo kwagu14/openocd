@@ -21,6 +21,8 @@
 #include "jtag/jtag.h"
 #include "avrt_jtag.h"
 
+
+
 static int avr_jtag_set_instr_reg(struct avrt_jtag *jtag_info, int new_instr)
 {
 	struct jtag_tap *tap;
@@ -91,6 +93,34 @@ static int avr_jtag_set_data_reg(struct avrt_jtag *jtag_info, uint8_t *data, tap
 
 
 	return ERROR_OK;
+}
+
+
+
+//note: TDO buffer must have memory allocated to it so it can hold the output
+static int avr_jtag_read_data_reg(struct avrt_jtag *jtag_info, uint8_t *TDO_buffer, tap_state_t end_state){
+	
+	struct jtag_tap *tap;
+	tap = jtag_info->tap;
+	
+	//check that TAP was correctly initialized
+	if (!tap){
+		LOG_ERROR("Error in initializing the tap structure");
+		return ERROR_FAIL;
+		
+	}
+	
+	//create and initialize fields for the DR scan
+	struct scan_field field;
+	field.num_bits = tap->ir_length; //should always be 4
+	field.in_value = TDO_buffer;
+	
+	jtag_add_dr_scan(tap, 1, &field, end_state);
+	if (jtag_execute_queue() != ERROR_OK) {
+		LOG_ERROR("%s: read data register operation failed", __func__);
+		return ERROR_FAIL;
+	}
+	
 }
 
 
