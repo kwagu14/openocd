@@ -30,7 +30,8 @@
 /* 
 	Register values: 
 	
-	These are potential values that can go within the data registers
+	These are potential values that can go within the data registers using
+	jtag_add_dr_scan()
 */
 
 /*************** Programming Enable *********************/
@@ -42,7 +43,16 @@
 
 
 /*************** Program Command *********************/
-//(shift in through TDI; result of previous command shifted out through TDO)
+/*
+	These hex codes represent bit sequences that should be shifted in 
+	through TDI; the results of previous command sequences are shifted 
+	out through TDO)
+	
+	Note: some sequences have to be OR'ed with input to get the final
+	sequence that should be sent out through TDI; these are marked with
+	comments
+
+*/
 
 const int CHIP_ERASE[] = {0x2380, 0x3180, 0x3380, 0x3380};
 const int POLL_CHIP_ERASE = 0x3380;
@@ -61,6 +71,8 @@ const int WRITE_FLASH_PAGE[] = {0x3700, 0x3500, 0x3700, 0x3700};
 const int POLL_WRITE_FLASH_PAGE = 0x3700;
 
 const int ENTER_FLASH_READ = 0x2302;
+//low byte output appears on TDO when shifting the second sequence
+//high byte output appears when shifting the final sequence
 const int READ_FLASH_DATA[] = {0x3200, 0x3600, 0x3700};
 
 const int ENTER_EEPROM_WRITE = 0x2311;
@@ -70,7 +82,8 @@ const int WRITE_EEPROM_PAGE[] = {0x3300, 0x3100, 0x3300, 0x3300};
 const int POLL_EEPROM_WRITE_PAGE = 0x3300;
 
 const int ENTER_EEPROM_READ = 0x2303;
-//OR first bit sequence with low address byte
+//OR first bit sequence with low address byte; also:
+//output will appear on TDO when shifting the last 8 bits of final sequence 
 const int READ_EEPROM_BYTE[] = {0x3300, 0x3200, 0x3300};
 
 const int ENTER_FUSE_WRITE = 0x2340;
