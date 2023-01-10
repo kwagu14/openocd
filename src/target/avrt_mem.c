@@ -1,15 +1,15 @@
 /************************************************
-* Author: Karley W.								* 
-* 												*
-* File Purpose: Handles higher-level read and 	*
-* write capabilities for 8-bit AVR chips. 		*
-*												*
-* Note: this file was modeled after the 32-bit 	*
-* AVR driver, but reading and writing on 8-bit 	*
-* chips follows a very different process. Will 	*
+* Author: Karley W.                             * 
+*                                               *
+* File Purpose: Handles higher-level read and   *
+* write capabilities for 8-bit AVR chips.       *
+*                                               *
+* Note: this file was modeled after the 32-bit  *
+* AVR driver, but reading and writing on 8-bit  *
+* chips follows a very different process. Will  *
 * probably need modification after jtag file is *
-* created. 										*
-* 												*
+* created.                                      *
+*                                               *
 ************************************************/
 
 #ifdef HAVE_CONFIG_H

@@ -1,9 +1,9 @@
 /****************************************************
- * Author: Karley W.								*
- * kwagu14@lsu.edu									*
- *													*
- * All codes were discovered from the ATMEGA32A		*
- * datasheet 										*
+ * Author: Karley W.                                *
+ * kwagu14@lsu.edu                                  *
+ *                                                  *
+ * All codes were discovered from the ATMEGA32A     *
+ * datasheet                                        *
  ****************************************************/
  
  struct avrt_jtag {
