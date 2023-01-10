@@ -21,3 +21,46 @@
 #include "jtag/jtag.h"
 #include "avrt_jtag.h"
 
+static int avr_jtag_set_instr(struct avrt_jtag *jtag_info, int new_instr)
+{
+	struct jtag_tap *tap;
+	tap = jtag_info->tap;
+	uint32_t current_instruction;
+	uint8_t TDI_buffer[sizeof(uint32_t)] = {0};
+	uint8_t TDO_buffer[sizeof(uint32_t)];
+	
+	//check that TAP was correctly initialized
+	if (!tap){
+		LOG_ERROR("Error in initializing the tap structure");
+		return ERROR_FAIL;
+		
+	}
+	
+	current_instruction = buf_get_u32(tap->cur_instr, 0, tap->ir_length)
+
+	//If the current instruction is already the one we want to set return
+	if (current_instruction == (uint32_t)new_instr) {
+		return;
+	}
+	
+	//otherwise, create and initialize fields for the IR scan
+	struct scan_field field;
+	field.num_bits = tap->ir_length;
+	field.out_value = TDI_buffer;
+	buf_set_u32(TDI_buffer, 0, field.num_bits, new_instr);
+	field.in_value = TDO;
+	
+	//set instruction through TAP controller
+	jtag_add_ir_scan(tap, &field, TAP_IDLE);
+	if (jtag_execute_queue() != ERROR_OK) {
+		LOG_ERROR("%s: set instruction operation failed", __func__);
+		return ERROR_FAIL;
+	}
+
+
+	return ERROR_OK;
+}
+
+
+
+

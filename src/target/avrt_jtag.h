@@ -71,8 +71,8 @@ const int WRITE_FLASH_PAGE[] = {0x3700, 0x3500, 0x3700, 0x3700};
 const int POLL_WRITE_FLASH_PAGE = 0x3700;
 
 const int ENTER_FLASH_READ = 0x2302;
-//low byte output appears on TDO when shifting the second sequence
-//high byte output appears when shifting the final sequence
+//low byte output appears on TDO when shifting the last 8 bits of second sequence
+//high byte output appears when shifting the last 8 bits of final sequence
 const int READ_FLASH_DATA[] = {0x3200, 0x3600, 0x3700};
 
 const int ENTER_EEPROM_WRITE = 0x2311;
@@ -118,3 +118,6 @@ const int READ_CALIB_BYTE[] = {0x3600, 0x3700};
 const int NO_OP[] = {0x2300, 0x3300};
 
 
+//function declarations 
+
+static int avr_jtag_set_instr(struct avrt_jtag *jtag_info, int new_instr);
