@@ -65,7 +65,7 @@ static int avr_jtag_set_instr_reg(struct avrt_jtag *jtag_info, int new_instr)
 
 
 
-static int avr_jtag_set_data_reg(struct avrt_jtag *jtag_info, uint8_t *data, tap_state_t end_state)
+static int avr_jtag_set_data_reg(struct avrt_jtag *jtag_info, uint8_t *data, int data_reg_len, tap_state_t end_state)
 {
 	struct jtag_tap *tap;
 	tap = jtag_info->tap;
@@ -80,7 +80,7 @@ static int avr_jtag_set_data_reg(struct avrt_jtag *jtag_info, uint8_t *data, tap
 	
 	//create and initialize fields for the DR scan
 	struct scan_field field;
-	field.num_bits = tap->ir_length;
+	field.num_bits = data_reg_len;
 	field.out_value = TDI_buffer;
 	buf_set_u32(TDI_buffer, 0, field.num_bits, data);
 	
@@ -98,7 +98,7 @@ static int avr_jtag_set_data_reg(struct avrt_jtag *jtag_info, uint8_t *data, tap
 
 
 //note: TDO buffer must have memory allocated to it so it can hold the output
-static int avr_jtag_read_data_reg(struct avrt_jtag *jtag_info, uint8_t *TDO_buffer, tap_state_t end_state){
+static int avr_jtag_read_data_reg(struct avrt_jtag *jtag_info, uint8_t *TDO_buffer, int data_reg_len, tap_state_t end_state){
 	
 	struct jtag_tap *tap;
 	tap = jtag_info->tap;
@@ -112,7 +112,8 @@ static int avr_jtag_read_data_reg(struct avrt_jtag *jtag_info, uint8_t *TDO_buff
 	
 	//create and initialize fields for the DR scan
 	struct scan_field field;
-	field.num_bits = tap->ir_length; //should always be 4
+	//will vary based on what register is chosen
+	field.num_bits = data_reg_len; 
 	field.in_value = TDO_buffer;
 	
 	jtag_add_dr_scan(tap, 1, &field, end_state);
@@ -120,6 +121,32 @@ static int avr_jtag_read_data_reg(struct avrt_jtag *jtag_info, uint8_t *TDO_buff
 		LOG_ERROR("%s: read data register operation failed", __func__);
 		return ERROR_FAIL;
 	}
+	
+}
+
+
+
+//command should be the final bit sequence that gets passed to TDI (do bit operations before calling this function)
+static int* avr_jtag_exec_prog_command(struct avrt_jtag *jtag_info, int* command, int command_len){
+	
+	uint16_t command_output[command_len] = {0};
+	uint8_t TDI_buffer[sizeof(uint32_t)] = {0};
+	
+	for(int i = 0; i < command_len; i++){
+		
+		//put the next bit sequence in TDI_buffer; ea. sequence is 16 bits long
+		buf_set_u32(TDI_buffer, 0, 32, command[i]);
+		//set the command
+		avr_jtag_set_data_reg(jtag_info, TDI_buffer, PROG_COMMAND_LEN, TAP_IDLE);
+		//read command output
+		avr_jtag_read_data_reg(jtag_info, command_output, PROG_COMMAND_LEN, TAP_IDLE);
+		if (jtag_execute_queue() != ERROR_OK) {
+			LOG_ERROR("%s: execute program command operation failed", __func__);	
+		}
+		
+	}
+	
+	return command_output;
 	
 }
 
