@@ -21,7 +21,7 @@
 #include "jtag/jtag.h"
 #include "avrt_jtag.h"
 
-static int avr_jtag_set_instr(struct avrt_jtag *jtag_info, int new_instr)
+static int avr_jtag_set_instr_reg(struct avrt_jtag *jtag_info, int new_instr)
 {
 	struct jtag_tap *tap;
 	tap = jtag_info->tap;
@@ -62,5 +62,35 @@ static int avr_jtag_set_instr(struct avrt_jtag *jtag_info, int new_instr)
 }
 
 
+
+static int avr_jtag_set_data_reg(struct avrt_jtag *jtag_info, uint8_t *data, tap_state_t end_state)
+{
+	struct jtag_tap *tap;
+	tap = jtag_info->tap;
+	uint8_t TDI_buffer[sizeof(uint32_t)] = {0};
+	
+	//check that TAP was correctly initialized
+	if (!tap){
+		LOG_ERROR("Error in initializing the tap structure");
+		return ERROR_FAIL;
+		
+	}
+	
+	//create and initialize fields for the DR scan
+	struct scan_field field;
+	field.num_bits = tap->ir_length;
+	field.out_value = TDI_buffer;
+	buf_set_u32(TDI_buffer, 0, field.num_bits, data);
+	
+	//set current data register through TAP controller
+	jtag_add_dr_scan(tap, 1, &field, end_state);
+	if (jtag_execute_queue() != ERROR_OK) {
+		LOG_ERROR("%s: set data register operation failed", __func__);
+		return ERROR_FAIL;
+	}
+
+
+	return ERROR_OK;
+}
 
 

@@ -120,4 +120,5 @@ const int NO_OP[] = {0x2300, 0x3300};
 
 //function declarations 
 
-static int avr_jtag_set_instr(struct avrt_jtag *jtag_info, int new_instr);
+static int avr_jtag_set_instr_reg(struct avrt_jtag *jtag_info, int new_instr);
+static int avr_jtag_set_data_reg(struct avrt_jtag *jtag_info, uint8_t *data, tap_state_t end_state);
