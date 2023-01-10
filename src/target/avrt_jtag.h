@@ -10,6 +10,11 @@
 	struct jtag_tap *tap;
 };
 
+//data register lengths
+#define PROG_COMMAND_LEN 		15
+#define #PROG_ENABLE_LEN 		16
+#define #RESET_LEN 				1		
+
 /* 
 	JTAG Instruction codes:
 	
@@ -41,6 +46,7 @@
 
 /*************** Programming Enable *********************/
 #define PROG_ENABLE_SIG 			0xA370
+#define PROG_DISABLE				0x0
 
 /******************* Reset *************************/
 #define HOLD_RESET					0x1
