@@ -7,7 +7,7 @@
 * 												*
 * ATMEGA32 chips have an on-chip debug system, 	*
 * but the JTAG instructions to use it are 		*
-* proprietary. Instead, the programming 		*
+* proprietary. Instead, the chip's programming 	*
 * interface will be used to implement read and	*
 * write functions.								*
 *												*
@@ -120,6 +120,22 @@ static int avr_jtag_read_data_reg(struct avrt_jtag *jtag_info, uint8_t *TDO_buff
 		LOG_ERROR("%s: read data register operation failed", __func__);
 		return ERROR_FAIL;
 	}
+	
+}
+
+
+
+static int avr_jtag_read_internal_flash(){
+	
+	
+	
+}
+
+
+
+static int avr_jtag_write_internal_flash(){
+	
+	
 	
 }
 
