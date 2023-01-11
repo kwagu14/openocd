@@ -151,20 +151,42 @@ static int* avr_jtag_exec_prog_command(struct avrt_jtag *jtag_info, int* command
 }
 
 
-//wrapper function for easily toggling reset
-static int avr_jtag_toggle_reset(struct avrt_jtag *jtag_info, int value){
-	avr_jtag_set_data_reg(jtag_info, value, RESET_LEN, TAP_IDLE);
-}
-
-//wrapper function for easily toggling program enable
-static int avr_jtag_toggle_program_enable(struct avrt_jtag *jtag_info, int value){
-	avr_jtag_set_data_reg(jtag_info, value, PROG_ENABLE_LEN, TAP_IDLE);
-}
-
-
-
-static int avr_jtag_read_internal_flash(){
+//function for entering JTAG programming mode for ATMEGA32A
+static int avr_jtag_enter_prog_mode(struct avrt_jtag *jtag_info){
+	//toggle reset
+	avr_jtag_set_instr_reg(jtag_info, ATMEGA32_AVR_RESET);
+	avr_jtag_set_data_reg(jtag_info, HOLD_RESET, RESET_LEN, TAP_IDLE)
+	//toggle program enable
+	avr_jtag_set_data_reg(jtag_info, ATMEGA32_PROG_ENABLE);
+	avr_jtag_set_data_reg(jtag_info, PROG_ENABLE_SIG, PROG_ENABLE_LEN, TAP_IDLE);
+	//call program command instruction
+	avr_jtag_set_instr_reg(jtag_info, ATMEGA32_PROG_COMMANDS);
 	
+}
+
+
+
+//function for exiting programming mode
+static int avr_jtag_exit_prog_mode(struct avrt_jtag *jtag_info){
+	//call program command instruction; execute nop command
+	avr_jtag_set_instr_reg(jtag_info, ATMEGA32_PROG_COMMANDS);
+	avr_jtag_set_data_reg(jtag_info, NO_OP, PROG_COMMAND_LEN, TAP_IDLE)
+	//remove program enable signature
+	avr_jtag_set_data_reg(jtag_info, ATMEGA32_PROG_ENABLE);
+	avr_jtag_set_data_reg(jtag_info, PROG_DISABLE, PROG_ENABLE_LEN, TAP_IDLE);
+	//come out of reset
+	avr_jtag_set_instr_reg(jtag_info, ATMEGA32_AVR_RESET);
+	avr_jtag_set_data_reg(jtag_info, RELEASE_RESET, RESET_LEN, TAP_IDLE)
+	
+	
+}
+
+
+
+//function for reading two bytes of flash; high byte and low byte
+//all setup required (reset, prog enable) is handled internally
+static int avr_jtag_read_internal_flash(){
+	uint8_t TDI_buffer[sizeof(uint32_t)] = {0};
 	
 	
 }
